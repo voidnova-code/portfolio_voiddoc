@@ -1,0 +1,90 @@
+/* ===== RESET & GLOBAL STYLES ===== */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Color Palette */
+  --red: #D4290C;
+  --red-dark: #8B1A0A;
+  --red-hover: #B82209;
+  --cream: #000000;
+  --cream-dark: #111111;
+  --black: #FBF3EA;
+  --gray: #CCCCCC;
+  --gray-light: #888888;
+  --white: #FFFFFF;
+
+  /* Typography */
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Anton', 'Arial Black', sans-serif;
+  --font-mono: 'Space Grotesk', 'Consolas', monospace;
+
+  /* Spacing */
+  --sidebar-width: 220px;
+  --navbar-height: 60px;
+
+  /* Transitions */
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--cream);
+  color: var(--black);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s var(--ease);
+}
+
+ul {
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+::selection {
+  background: var(--red);
+  color: var(--white);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--cream);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--red-dark);
+  border-radius: 3px;
+}
+
+/* Pulse animation for loading badge */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
