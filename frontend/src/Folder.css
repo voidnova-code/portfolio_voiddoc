@@ -1,0 +1,88 @@
+.folder-group {
+  position: relative;
+  transition: all 0.2s ease-in;
+  cursor: pointer;
+  outline: none;
+}
+
+.folder-group:focus-visible {
+  box-shadow: 0 0 0 2px white;
+  border-radius: 10px;
+}
+
+.folder-closed:hover {
+  transform: translateY(-8px);
+}
+
+.folder-back {
+  position: relative;
+  width: 100px;
+  height: 80px;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
+  border-top-left-radius: 0;
+}
+
+.folder-tab {
+  position: absolute;
+  z-index: 0;
+  bottom: 98%;
+  left: 0;
+  width: 30px;
+  height: 10px;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.folder-paper {
+  position: absolute;
+  z-index: 20;
+  bottom: 10%;
+  left: 50%;
+  border-radius: 10px;
+  transition: all 0.3s ease-in-out;
+}
+
+.paper-closed {
+  transform: translate(-50%, 10%);
+}
+
+.folder-group:hover .paper-closed {
+  transform: translate(-50%, 0);
+}
+
+.paper-open:hover {
+  scale: 1.1;
+}
+
+.folder-front {
+  position: absolute;
+  z-index: 30;
+  width: 100%;
+  height: 100%;
+  transform-origin: bottom;
+  transition: all 0.3s ease-in-out;
+  border-radius: 5px 10px 10px 10px;
+}
+
+.folder-group:hover .folder-front-closed-1 {
+  transform: skew(15deg) scaleY(0.6);
+}
+
+.folder-group:hover .folder-front-closed-2 {
+  transform: skew(-15deg) scaleY(0.6);
+}
+
+/* Internal contents of the folder paper items */
+.folder-paper-content {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 5px;
+  font-size: 0.2rem; /* The folder is tiny (100x80px base size), scaled by the size prop */
+}

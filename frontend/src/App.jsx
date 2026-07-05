@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import LineWaves from './LineWaves'
 import FluidGlass from './FluidGlass'
+import Lanyard from './Lanyard'
+import RotatingText from './RotatingText'
+import Folder from './Folder'
 import './App.css'
 
 function App() {
@@ -11,6 +14,19 @@ function App() {
   })
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
+  const [idImage, setIdImage] = useState(null)
+
+  // Fetch ID Card image
+  useEffect(() => {
+    fetch('http://127.0.0.1:8000/api/id-card/')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.status === 'ok') {
+          setIdImage(data.image_url)
+        }
+      })
+      .catch((err) => console.error("Failed to fetch ID card image:", err))
+  }, [])
 
   // Backend health check
   useEffect(() => {
@@ -53,6 +69,29 @@ function App() {
   const scrollTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' })
   }
+
+  const renderSkillFolder = (title, desc, tags) => (
+    <Folder
+      size={2}
+      color="#D4290C"
+      items={[
+        <div key="1" style={{ padding: '6px', color: '#111', width: '100%', height: '100%', boxSizing: 'border-box' }}>
+          <h3 style={{ fontSize: '10px', margin: '0 0 4px 0', textTransform: 'uppercase', letterSpacing: '0.5px', fontFamily: 'var(--font-mono)' }}>{title}</h3>
+          <p style={{ fontSize: '6px', margin: '0', lineHeight: 1.4, color: '#444' }}>{desc}</p>
+        </div>,
+        <div key="2" style={{ padding: '6px', display: 'flex', flexWrap: 'wrap', gap: '4px', alignContent: 'flex-start', width: '100%', height: '100%', boxSizing: 'border-box' }}>
+          {tags.map(t => (
+            <span key={t} style={{ fontSize: '5px', padding: '2px 4px', backgroundColor: '#e2e2e2', color: '#222', borderRadius: '3px', fontWeight: 'bold', fontFamily: 'var(--font-mono)' }}>{t}</span>
+          ))}
+        </div>,
+        <div key="3" style={{ padding: '6px', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', opacity: 0.5 }}>
+          <div style={{ width: '35px', height: '4px', backgroundColor: '#999', borderRadius: '2px', marginBottom: '6px' }} />
+          <div style={{ width: '25px', height: '4px', backgroundColor: '#999', borderRadius: '2px', marginBottom: '6px' }} />
+          <div style={{ width: '30px', height: '4px', backgroundColor: '#999', borderRadius: '2px' }} />
+        </div>
+      ]}
+    />
+  )
 
   return (
     <>
@@ -129,7 +168,7 @@ function App() {
       <main className="main-content">
         {/* HERO */}
         <section className="hero-section" id="home" style={{ position: 'relative', overflow: 'hidden' }}>
-          
+
           {/* Fluid Glass overlay — sits on top as a decorative effect */}
           <div style={{
             position: 'absolute',
@@ -196,67 +235,53 @@ function App() {
           </div>
         </div>
 
-        {/* ===== ABOUT SECTION ===== */}
-        <section className="section" id="about">
-          <div className="section-label">About Me</div>
-          <h2 className="section-title">Who I Am</h2>
-          <p className="hero-description" style={{ marginBottom: 0 }}>
-            I&apos;m a Computer Science undergraduate with a passion for building robust,
-            scalable software systems. I love working across the entire stack — from
-            designing intuitive mobile and web interfaces to architecting efficient
-            backends and databases. I&apos;m always exploring new technologies and pushing
-            myself to write cleaner, more performant code.
-          </p>
+        <section className="section" id="about" style={{ position: 'relative', overflow: 'hidden' }}>
+          <div className="about-grid">
+            <div className="about-content">
+              <div className="section-label">About Me</div>
+              <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', minHeight: '3.5rem', textTransform: 'uppercase' }}>
+                <span>Who am I, A</span>
+                <RotatingText
+                  texts={['DEVELOPER ?', 'CREATOR ?', 'PROBLEM SOLVER ?']}
+                  mainClassName="rotating-badge"
+                  staggerFrom="last"
+                  initial={{ y: "100%" }}
+                  animate={{ y: 0 }}
+                  exit={{ y: "-120%" }}
+                  staggerDuration={0.025}
+                  splitLevelClassName="word-wrapper"
+                  transition={{ type: "spring", damping: 30, stiffness: 400 }}
+                  rotationInterval={3000}
+                  splitBy="characters"
+                  auto
+                  loop
+                />
+              </h2>
+              <p className="hero-description" style={{ marginBottom: '1.5rem' }}>
+                I&apos;m a Computer Science undergraduate who spends an unhealthy amount of time building full-stack apps and staring at terminal windows. From spinning up sleek Flutter interfaces to wrestling with Django backends and PostgreSQL databases, I love bringing ideas to life—even if it means occasionally questioning my sanity over a missing semicolon.
+              </p>
+              <p className="hero-description" style={{ marginBottom: '1.5rem' }}>
+                But my world isn&apos;t just ones and zeros! I also have a creative side: I use Blender to sculpt 3D models (so my digital worlds look as good as they function) and I edit videos in DaVinci Resolve to make sure the final cuts are cinematic masterpieces.
+              </p>
+              <p className="hero-description" style={{ marginBottom: 0 }}>
+                When I finally step away from the glowing rectangle, you can usually find me cooking up a storm in the kitchen (debugging recipes is remarkably similar to debugging code) or swimming to burn off all the calories from said cooking. I&apos;m always down to collaborate on wild new projects or debate the best pizza toppings!
+              </p>
+            </div>
+            <div className="about-3d">
+              <Lanyard position={[0, 0.5, 20]} gravity={[0, -40, 0]} frontImage={idImage} />
+            </div>
+          </div>
         </section>
 
         {/* SKILLS */}
         <section className="section" id="skills">
           <div className="section-label">Skills</div>
           <h2 className="section-title">What I Work With</h2>
-          <div className="skills-grid">
-            <div className="skill-card">
-              <h3>Frontend</h3>
-              <p>Building responsive, high-performance user interfaces with modern frameworks.</p>
-              <div className="skill-tags">
-                <span className="skill-tag">React</span>
-                <span className="skill-tag">Flutter</span>
-                <span className="skill-tag">JavaScript</span>
-                <span className="skill-tag">Dart</span>
-                <span className="skill-tag">HTML/CSS</span>
-              </div>
-            </div>
-            <div className="skill-card">
-              <h3>Backend</h3>
-              <p>Designing APIs and server-side logic with reliability and scalability in mind.</p>
-              <div className="skill-tags">
-                <span className="skill-tag">Django</span>
-                <span className="skill-tag">DRF</span>
-                <span className="skill-tag">Python</span>
-                <span className="skill-tag">Node.js</span>
-                <span className="skill-tag">REST</span>
-              </div>
-            </div>
-            <div className="skill-card">
-              <h3>Database</h3>
-              <p>Modeling normalized schemas and writing efficient queries for data-intensive apps.</p>
-              <div className="skill-tags">
-                <span className="skill-tag">PostgreSQL</span>
-                <span className="skill-tag">SQLite</span>
-                <span className="skill-tag">MySQL</span>
-                <span className="skill-tag">Firebase</span>
-              </div>
-            </div>
-            <div className="skill-card">
-              <h3>Tools & DevOps</h3>
-              <p>Streamlining workflows with version control, CI/CD, and deployment tools.</p>
-              <div className="skill-tags">
-                <span className="skill-tag">Git</span>
-                <span className="skill-tag">GitHub</span>
-                <span className="skill-tag">Docker</span>
-                <span className="skill-tag">Linux</span>
-                <span className="skill-tag">VS Code</span>
-              </div>
-            </div>
+          <div className="skills-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '3rem 2rem', placeItems: 'center', marginTop: '4rem', paddingBottom: '2rem' }}>
+            {renderSkillFolder('Frontend', 'Building responsive, high-performance user interfaces with modern frameworks.', ['React', 'Flutter', 'JavaScript', 'Dart', 'HTML/CSS'])}
+            {renderSkillFolder('Backend', 'Designing APIs and server-side logic with reliability and scalability in mind.', ['Django', 'DRF', 'Python', 'Node.js', 'REST'])}
+            {renderSkillFolder('Database', 'Modeling normalized schemas and writing efficient queries for data-intensive apps.', ['PostgreSQL', 'SQLite', 'MySQL', 'Firebase'])}
+            {renderSkillFolder('Tools & DevOps', 'Streamlining workflows with version control, CI/CD, and deployment tools.', ['Git', 'GitHub', 'Docker', 'Linux', 'VS Code'])}
           </div>
         </section>
 
@@ -414,9 +439,8 @@ function App() {
 
       {/* BACKEND STATUS BADGE */}
       <div
-        className={`backend-badge ${
-          backendStatus.loading ? 'loading' : backendStatus.connected ? 'connected' : 'error'
-        }`}
+        className={`backend-badge ${backendStatus.loading ? 'loading' : backendStatus.connected ? 'connected' : 'error'
+          }`}
       >
         <span className={`badge-dot ${backendStatus.loading ? 'pulse' : ''}`} />
         {backendStatus.loading

@@ -364,7 +364,7 @@
 /* ===== ABOUT SECTION ===== */
 .section {
   padding: 5rem 4rem 5rem 5rem;
-  min-height: calc(100vh - var(--navbar-height));
+  min-height: 110vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -399,6 +399,66 @@
   line-height: 1;
 }
 
+.rotating-badge {
+  background-color: var(--red);
+  color: var(--white);
+  padding: 0.1em 0.4em;
+  border-radius: 0.2em;
+  overflow: hidden;
+  display: inline-flex;
+  justify-content: center;
+}
+
+/* Utility classes for RotatingText component */
+.flex { display: flex; }
+.flex-wrap { flex-wrap: wrap; }
+.whitespace-pre-wrap { white-space: pre-wrap; }
+.relative { position: relative; }
+.flex-col { flex-direction: column; }
+.w-full { width: 100%; }
+.inline-flex { display: inline-flex; }
+.inline-block { display: inline-block; }
+
+.word-wrapper {
+  overflow: hidden;
+  padding-bottom: 0.125rem;
+}
+
+.about-grid {
+  display: flex;
+  align-items: center;
+  gap: 4rem;
+}
+
+.about-content {
+  width: 55%;
+  position: relative;
+  z-index: 2;
+}
+
+.about-3d {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 45%;
+  height: 100%;
+  z-index: 10;
+  pointer-events: auto;
+}
+
+@media (max-width: 1024px) {
+  .about-grid {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .about-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+
 /* ===== SKILLS SECTION ===== */
 .skills-grid {
   display: grid;
@@ -408,9 +468,7 @@
 }
 
 .skill-card {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--cream-dark);
   border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 1.75rem;
   transition: all 0.3s var(--ease);

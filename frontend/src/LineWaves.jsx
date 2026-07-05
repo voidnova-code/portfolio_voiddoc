@@ -130,7 +130,7 @@ void main() {
 `;
 
 export default function LineWaves({
-  speed = 0.3,
+  speed = -1,
   innerLineCount = 32.0,
   outerLineCount = 36.0,
   warpIntensity = 1.0,
