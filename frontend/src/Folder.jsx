@@ -19,7 +19,7 @@ const darkenColor = (hex, percent) => {
   return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
 };
 
-const Folder = ({ color = '#5227FF', size = 1, items = [], className = '' }) => {
+const Folder = ({ color = '#5227FF', size = 1, items = [], className = '', onPaperClick }) => {
   const maxItems = 3;
   const papers = items.slice(0, maxItems);
   while (papers.length < maxItems) {
@@ -102,15 +102,16 @@ const Folder = ({ color = '#5227FF', size = 1, items = [], className = '' }) => 
         aria-expanded={open}
         aria-label={open ? 'Close folder' : 'Open folder'}
       >
+        {/* Tab sits outside folder-back so it isn't clipped by overflow:hidden */}
+        <span
+          className="folder-tab"
+          style={{ backgroundColor: folderBackColor }}
+        ></span>
+
         <div
           className="folder-back"
-          style={{ backgroundColor: folderBackColor }}
+          style={{ backgroundColor: folderBackColor, overflow: open ? 'visible' : 'hidden' }}
         >
-          <span
-            className="folder-tab"
-            style={{ backgroundColor: folderBackColor }}
-          ></span>
-          
           {papers.map((item, i) => {
             let sizeStyle = {};
             if (i === 0) sizeStyle = open ? { width: '70%', height: '80%' } : { width: '70%', height: '80%' };
@@ -126,6 +127,10 @@ const Folder = ({ color = '#5227FF', size = 1, items = [], className = '' }) => 
                 key={i}
                 onMouseMove={e => handlePaperMouseMove(e, i)}
                 onMouseLeave={e => handlePaperMouseLeave(e, i)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPaperClick?.(i);
+                }}
                 className={`folder-paper ${!open ? 'paper-closed' : 'paper-open'}`}
                 style={{
                   ...sizeStyle,
@@ -157,6 +162,7 @@ const Folder = ({ color = '#5227FF', size = 1, items = [], className = '' }) => 
       </div>
     </div>
   );
+
 };
 
 export default Folder;

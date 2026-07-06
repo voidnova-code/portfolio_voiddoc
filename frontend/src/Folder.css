@@ -14,6 +14,11 @@
   transform: translateY(-8px);
 }
 
+/* Allow papers to peek out of the folder on hover & when open */
+.folder-group:hover .folder-back {
+  overflow: visible;
+}
+
 .folder-back {
   position: relative;
   width: 100px;
@@ -22,12 +27,14 @@
   border-bottom-right-radius: 10px;
   border-bottom-left-radius: 10px;
   border-top-left-radius: 0;
+  overflow: hidden;
 }
 
 .folder-tab {
   position: absolute;
-  z-index: 0;
-  bottom: 98%;
+  z-index: 2;
+  /* Anchor to top-left of folder-group, sitting just above folder-back */
+  bottom: 100%;
   left: 0;
   width: 30px;
   height: 10px;

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import LineWaves from './LineWaves'
+import Silk from './Silk'
 import FluidGlass from './FluidGlass'
 import Lanyard from './Lanyard'
 import RotatingText from './RotatingText'
 import Folder from './Folder'
+import { motion, AnimatePresence } from 'motion/react'
 import './App.css'
 
 function App() {
@@ -15,17 +16,24 @@ function App() {
   const [scrolled, setScrolled] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
   const [idImage, setIdImage] = useState(null)
+  const [idImageReady, setIdImageReady] = useState(false)
+  const [activeSkill, setActiveSkill] = useState(null)
 
-  // Fetch ID Card image
+  // Fetch ID Card image — use Vite proxy (/api) so media URLs share the same origin
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/id-card/')
+    fetch('/api/id-card/')
       .then((res) => res.json())
       .then((data) => {
         if (data.status === 'ok') {
-          setIdImage(data.image_url)
+          // Rewrite the absolute Django URL to a proxied relative path so
+          // Three.js TextureLoader loads the image same-origin (no CORS)
+          const raw = data.image_url
+          const proxied = raw.replace(/^https?:\/\/[^/]+/, '')
+          setIdImage(proxied)
+          setIdImageReady(true)
         }
       })
-      .catch((err) => console.error("Failed to fetch ID card image:", err))
+      .catch((err) => console.error('Failed to fetch ID card image:', err))
   }, [])
 
   // Backend health check
@@ -71,46 +79,61 @@ function App() {
   }
 
   const renderSkillFolder = (title, desc, tags) => (
-    <Folder
-      size={2}
-      color="#D4290C"
-      items={[
-        <div key="1" style={{ padding: '6px', color: '#111', width: '100%', height: '100%', boxSizing: 'border-box' }}>
-          <h3 style={{ fontSize: '10px', margin: '0 0 4px 0', textTransform: 'uppercase', letterSpacing: '0.5px', fontFamily: 'var(--font-mono)' }}>{title}</h3>
-          <p style={{ fontSize: '6px', margin: '0', lineHeight: 1.4, color: '#444' }}>{desc}</p>
-        </div>,
-        <div key="2" style={{ padding: '6px', display: 'flex', flexWrap: 'wrap', gap: '4px', alignContent: 'flex-start', width: '100%', height: '100%', boxSizing: 'border-box' }}>
-          {tags.map(t => (
-            <span key={t} style={{ fontSize: '5px', padding: '2px 4px', backgroundColor: '#e2e2e2', color: '#222', borderRadius: '3px', fontWeight: 'bold', fontFamily: 'var(--font-mono)' }}>{t}</span>
-          ))}
-        </div>,
-        <div key="3" style={{ padding: '6px', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', opacity: 0.5 }}>
-          <div style={{ width: '35px', height: '4px', backgroundColor: '#999', borderRadius: '2px', marginBottom: '6px' }} />
-          <div style={{ width: '25px', height: '4px', backgroundColor: '#999', borderRadius: '2px', marginBottom: '6px' }} />
-          <div style={{ width: '30px', height: '4px', backgroundColor: '#999', borderRadius: '2px' }} />
-        </div>
-      ]}
-    />
+    <div className="skill-folder-wrapper">
+      <div style={{ padding: '2rem 1rem 0 1rem', display: 'flex', justifyContent: 'center', width: '100%' }}>
+        <Folder
+          size={1.7}
+          color="#D4290C"
+          onPaperClick={() => setActiveSkill({ title, desc, tags })}
+          items={[
+            /* Back Paper (Abstract lines looking like a text document) */
+            <div key="1" style={{ padding: '8px', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', gap: '5px', boxSizing: 'border-box' }}>
+              <div style={{ width: '40%', height: '3px', background: '#ccc', borderRadius: '2px', marginBottom: '4px' }} />
+              <div style={{ width: '80%', height: '3px', background: '#ddd', borderRadius: '2px' }} />
+              <div style={{ width: '90%', height: '3px', background: '#ddd', borderRadius: '2px' }} />
+              <div style={{ width: '70%', height: '3px', background: '#ddd', borderRadius: '2px' }} />
+              <div style={{ width: '85%', height: '3px', background: '#ddd', borderRadius: '2px' }} />
+              <div style={{ width: '60%', height: '3px', background: '#ddd', borderRadius: '2px' }} />
+            </div>,
+            /* Middle Paper (Grid of tags looking like a technical spec) */
+            <div key="2" style={{ padding: '8px', width: '100%', height: '100%', display: 'flex', flexWrap: 'wrap', gap: '4px', alignContent: 'flex-start', boxSizing: 'border-box' }}>
+              <div style={{ fontSize: '5px', fontWeight: 'bold', color: '#999', width: '100%', marginBottom: '2px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Tech Specs</div>
+              {tags.map(t => (
+                <span key={t} style={{ fontSize: '4.5px', padding: '2px 4px', backgroundColor: '#e8e8e8', color: '#555', borderRadius: '2px', fontWeight: 'bold', fontFamily: 'var(--font-mono)' }}>{t}</span>
+              ))}
+            </div>,
+            /* Front Paper (Cover page with the Title) */
+            <div key="3" style={{ padding: '8px', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', boxSizing: 'border-box', border: '1px solid rgba(0,0,0,0.05)' }}>
+              <div style={{ width: '100%', height: '6px', background: 'var(--red)', borderRadius: '2px', marginBottom: '12px' }} />
+              <h3 style={{ fontSize: '11px', margin: '0', textTransform: 'uppercase', letterSpacing: '0.5px', fontFamily: 'var(--font-heading)', color: '#111', textAlign: 'center', lineHeight: 1.1 }}>{title}</h3>
+              <div style={{ marginTop: 'auto', display: 'flex', gap: '3px', justifyContent: 'center' }}>
+                <div style={{ width: '15px', height: '3px', background: '#ccc', borderRadius: '1.5px' }} />
+                <div style={{ width: '15px', height: '3px', background: '#ccc', borderRadius: '1.5px' }} />
+              </div>
+            </div>
+          ]}
+        />
+      </div>
+      {/* Animated label below the folder */}
+      <div className="skill-folder-label">
+        <span className="skill-folder-label-text">{title}</span>
+        <span className="skill-folder-label-count">{tags.length} tools</span>
+        <div className="skill-folder-label-line" />
+      </div>
+    </div>
   )
+
 
   return (
     <>
-      {/* ===== BACKGROUND WAVES ===== */}
+      {/* ===== BACKGROUND SILK ===== */}
       <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: -1 }}>
-        <LineWaves
-          speed={0.3}
-          innerLineCount={32}
-          outerLineCount={36}
-          warpIntensity={1}
-          rotation={-45}
-          edgeFadeWidth={0}
-          colorCycleSpeed={1}
-          brightness={0.1}
-          color1="#ffffff"
-          color2="#ffffff"
-          color3="#ffffff"
-          enableMouseInteraction
-          mouseInfluence={2}
+        <Silk
+          speed={5}
+          scale={1}
+          color="#3a383f"
+          noiseIntensity={1}
+          rotation={0}
         />
       </div>
 
@@ -242,7 +265,7 @@ function App() {
               <h2 className="section-title" style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', minHeight: '3.5rem', textTransform: 'uppercase' }}>
                 <span>Who am I, A</span>
                 <RotatingText
-                  texts={['DEVELOPER ?', 'CREATOR ?', 'PROBLEM SOLVER ?']}
+                  texts={['DEVELOPER ?', 'CREATOR ?', 'BUILDER ?']}
                   mainClassName="rotating-badge"
                   staggerFrom="last"
                   initial={{ y: "100%" }}
@@ -257,31 +280,45 @@ function App() {
                   loop
                 />
               </h2>
-              <p className="hero-description" style={{ marginBottom: '1.5rem' }}>
+              <p className="hero-description" style={{ marginBottom: '2rem', lineHeight: '1.8' }}>
                 I&apos;m a Computer Science undergraduate who spends an unhealthy amount of time building full-stack apps and staring at terminal windows. From spinning up sleek Flutter interfaces to wrestling with Django backends and PostgreSQL databases, I love bringing ideas to life—even if it means occasionally questioning my sanity over a missing semicolon.
               </p>
-              <p className="hero-description" style={{ marginBottom: '1.5rem' }}>
+              <p className="hero-description" style={{ marginBottom: '2rem', lineHeight: '1.8' }}>
                 But my world isn&apos;t just ones and zeros! I also have a creative side: I use Blender to sculpt 3D models (so my digital worlds look as good as they function) and I edit videos in DaVinci Resolve to make sure the final cuts are cinematic masterpieces.
               </p>
-              <p className="hero-description" style={{ marginBottom: 0 }}>
+              <p className="hero-description" style={{ marginBottom: '1rem', lineHeight: '1.8' }}>
                 When I finally step away from the glowing rectangle, you can usually find me cooking up a storm in the kitchen (debugging recipes is remarkably similar to debugging code) or swimming to burn off all the calories from said cooking. I&apos;m always down to collaborate on wild new projects or debate the best pizza toppings!
               </p>
             </div>
             <div className="about-3d">
-              <Lanyard position={[0, 0.5, 20]} gravity={[0, -40, 0]} frontImage={idImage} />
+              {idImageReady
+                ? <Lanyard position={[0, 0.5, 20]} gravity={[0, -40, 0]} frontImage={idImage} />
+                : null
+              }
             </div>
           </div>
         </section>
 
+        {/* THIN RED STRIP DIVIDER */}
+        <div className="section-divider"></div>
+
         {/* SKILLS */}
-        <section className="section" id="skills">
+        <section className="section" id="skills" style={{ position: 'relative' }}>
+          {/* Huge background text */}
+          <div className="bg-watermark">EXPERTISE</div>
+          
           <div className="section-label">Skills</div>
           <h2 className="section-title">What I Work With</h2>
-          <div className="skills-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '3rem 2rem', placeItems: 'center', marginTop: '4rem', paddingBottom: '2rem' }}>
-            {renderSkillFolder('Frontend', 'Building responsive, high-performance user interfaces with modern frameworks.', ['React', 'Flutter', 'JavaScript', 'Dart', 'HTML/CSS'])}
-            {renderSkillFolder('Backend', 'Designing APIs and server-side logic with reliability and scalability in mind.', ['Django', 'DRF', 'Python', 'Node.js', 'REST'])}
-            {renderSkillFolder('Database', 'Modeling normalized schemas and writing efficient queries for data-intensive apps.', ['PostgreSQL', 'SQLite', 'MySQL', 'Firebase'])}
-            {renderSkillFolder('Tools & DevOps', 'Streamlining workflows with version control, CI/CD, and deployment tools.', ['Git', 'GitHub', 'Docker', 'Linux', 'VS Code'])}
+          <p className="section-subtitle">
+            Hover over the folders to peek inside, and click any paper to open the full dossier on my technical stack, tools, and creative expertise.
+          </p>
+          <div className="skills-grid">
+            {renderSkillFolder('Frontend', 'Building pixel-perfect, highly responsive, and high-performance user interfaces with modern frameworks. Passionate about crafting dynamic experiences that engage users from the first click, focusing on fluid animations and component-driven architecture.', ['React', 'Flutter', 'JavaScript', 'Dart', 'HTML/CSS'])}
+            {renderSkillFolder('Backend', 'Designing robust APIs and secure server-side logic with reliability and scalability in mind. Focused on implementing secure authentication, real-time data processing, and optimizing server infrastructure to seamlessly handle massive traffic.', ['Django', 'DRF', 'Python', 'Node.js', 'REST'])}
+            {renderSkillFolder('Database', 'Modeling normalized schemas and writing highly optimized queries for data-intensive applications. Experienced in advanced indexing, caching strategies, and managing real-time data synchronization for absolute data integrity.', ['PostgreSQL', 'SQLite', 'MySQL', 'Firebase'])}
+            {renderSkillFolder('Tools & DevOps', 'Streamlining complex workflows with advanced version control, CI/CD pipelines, and modern deployment tools. Dedicated to automating repetitive tasks and containerizing environments with Docker for robust, testable codebases.', ['Git', 'GitHub', 'Docker', 'Linux', 'VS Code'])}
+            {renderSkillFolder('3D Modeling', 'Sculpting realistic 3D models and rendering immersive digital environments. Skilled in hard-surface modeling, complex texturing, and cinematic lighting to bring imaginative concepts into tangible visual assets using Blender.', ['Blender', '3D Modeling', 'Rendering'])}
+            {renderSkillFolder('Video Editing', 'Delivering professional video editing, cinematic color grading, and dynamic post-production. Transforming raw footage into engaging stories with precise pacing and atmospheric sound design using DaVinci Resolve.', ['DaVinci Resolve', 'Video Editing', 'Color Grading'])}
           </div>
         </section>
 
@@ -449,6 +486,48 @@ function App() {
             ? `✓ ${backendStatus.message}`
             : `✗ ${backendStatus.message}`}
       </div>
+      {/* ACTIVE SKILL MODAL */}
+      <AnimatePresence>
+        {activeSkill && (
+          <motion.div
+            className="skill-modal-backdrop"
+            initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            animate={{ opacity: 1, backdropFilter: 'blur(10px)' }}
+            exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+            onClick={() => setActiveSkill(null)}
+          >
+            <motion.div
+              className="skill-modal-content"
+              initial={{ scale: 0.8, y: 50, opacity: 0 }}
+              animate={{ scale: 1, y: 0, opacity: 1 }}
+              exit={{ scale: 0.9, y: 20, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button className="skill-modal-close" onClick={() => setActiveSkill(null)}>✕</button>
+              <h2 className="skill-modal-title">{activeSkill.title}</h2>
+              <div className="skill-modal-divider"></div>
+              <p className="skill-modal-desc">{activeSkill.desc}</p>
+              <div className="skill-modal-tags">
+                {activeSkill.tags.map((t, i) => (
+                  <motion.span 
+                    key={t} 
+                    className="skill-tag"
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.1 + 0.2 }}
+                    whileHover={{ scale: 1.1, backgroundColor: 'var(--red)', color: 'var(--white)' }}
+                    whileTap={{ scale: 0.95 }}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {t}
+                  </motion.span>
+                ))}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }
